@@ -10,8 +10,11 @@ io.on('connection', socket => {
     let game_id = data["game_id"]
     let username = data["username"]
     ActiveUsersManager.addActiveUser(game_id, user_id, socket.id, username)
-    let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
-    let game = ActiveGamesManager.getActiveGameById(user.game_id)
+    let game = ActiveGamesManager.getActiveGameById(game_id)
+    if (!game){
+      game = ActiveGamesManager.createActiveGame(user_id, game_id)
+      game.saveToFile()
+    }
     socket.emit(Endpoints.CONNECT_TO_GAME, game.getGame(user_id));
   })
 
