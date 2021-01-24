@@ -2,7 +2,7 @@ const io = require('socket.io')(3000)
 const ActiveUsersManager = require("./managers/activeUsers")
 const PathsManager = require("./staticGameConfiguration/paths")
 const ActiveGamesManager = require("./managers/activeGames")
-const Endpoints = require("./staticGameConfiguration/endponts")
+const Endpoints = require("./staticGameConfiguration/endpoints")
 
 io.on('connection', socket => {
   socket.on(Endpoints.CONNECT_TO_GAME, data => {
@@ -25,17 +25,42 @@ io.on('connection', socket => {
     game.saveToFile()
     let success = game.addPlayer(user.user_id)
     if (!success) return null
-    let gameUsers = ActiveUsersManager.getUsersByGameId(game.id)
-    gameUsers.forEach(player =>{
-      io.sockets.connected[player.session_id].emit(Endpoints.JOIN_GAME, game.getGame(player.user_id));
-    })
+    sendLobbyChangedToPlayers(game)
   })
+
+  socket.on(Endpoints.CHANGE_COLOR, color => {
+    let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    let game = ActiveGamesManager.getActiveGameById(user.game_id)
+    if (!game || game.status !== 0) return null
+    let success = game.setColor(user.user_id, parseInt(color))
+    if (!success) return null
+    game.saveToFile()
+    sendLobbyChangedToPlayers(game)
+  })
+
+  socket.on(Endpoints.CHANGE_MISTER_X, misterXId =>{
+    let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    let game = ActiveGamesManager.getActiveGameById(user.game_id)
+    if (!game || game.status !== 0) return null
+    let success = game.setMisterX(user.user_id, misterXId)
+    if (!success) return null
+    game.saveToFile()
+    sendLobbyChangedToPlayers(game)
+  })
+
 
   socket.on('disconnect', () => {
     //socket.broadcast.emit('user-disconnected', users[socket.id])
     ActiveUsersManager.saveUserList(ActiveUsersManager.removeUserBySessionId(socket.id))
   })
 })
+
+function sendLobbyChangedToPlayers(game){
+  let gameUsers = ActiveUsersManager.getUsersByGameId(game.id)
+  gameUsers.forEach(player =>{
+    io.sockets.connected[player.session_id].emit(Endpoints.LOBBY_MODIFIED, game.getGame(player.user_id));
+  })
+}
 
 
 
