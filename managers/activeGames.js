@@ -13,6 +13,7 @@ class ActiveGamesUser{
         this.used_taxi = userDict.used_taxi
         this.used_bus = userDict.used_bus
         this.used_underground = userDict.used_underground
+        this.online = userDict.online
     }
 
     move(_from, _to, transport) {
@@ -155,12 +156,23 @@ class ActiveGamesManager{
             color: this.findFirstAvailableColor(),
             used_taxi: 0,
             used_bus: 0,
-            used_underground: 0
+            used_underground: 0,
+            online: true
         }
         this.players.push(new ActiveGamesUser(userDict))
         this.players_order.push(userId)
         return true
     } //funziona
+
+    removePlayer(userId){
+        for (let i=0; i<this.players.length; i++){
+            if (this.players[i].user_id === userId){
+                delete this.players[i].user_id
+                return true
+            }
+        }
+        return false
+    }
 
     getPlayerById(playerId){ //funziona
         for (let i=0; i<this.players.length;i++){
@@ -373,7 +385,8 @@ class ActiveGamesManager{
                     color: 0,
                     used_taxi: 0,
                     used_bus: 0,
-                    used_underground: 0
+                    used_underground: 0,
+                    online: true
                 }
             ],
             total_moves: 0,

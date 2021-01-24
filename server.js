@@ -50,8 +50,21 @@ io.on('connection', socket => {
 
 
   socket.on('disconnect', () => {
+    let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    let game = ActiveGamesManager.getActiveGameById(user.game_id)
+    if (game){
+      if (game.status === 0){
+        let success = game.removePlayer(user.user_id)
+        if (success) sendLobbyChangedToPlayers(game)
+      }else{
+        //send user offline, chenage user status
+      }
+    }else{
+
+    }
     //socket.broadcast.emit('user-disconnected', users[socket.id])
     ActiveUsersManager.saveUserList(ActiveUsersManager.removeUserBySessionId(socket.id))
+    //remove from game if game is in lobby else send notification to players
   })
 })
 
@@ -59,6 +72,13 @@ function sendLobbyChangedToPlayers(game){
   let gameUsers = ActiveUsersManager.getUsersByGameId(game.id)
   gameUsers.forEach(player =>{
     io.sockets.connected[player.session_id].emit(Endpoints.LOBBY_MODIFIED, game.getGame(player.user_id));
+  })
+}
+
+function emitToPlayers(game, endpoint, message){
+  let gameUsers = ActiveUsersManager.getUsersByGameId(game.id)
+  gameUsers.forEach(player =>{
+    io.sockets.connected[player.session_id].emit(endpoint, message);
   })
 }
 
