@@ -5,20 +5,18 @@ const ActiveGamesManager = require("./managers/activeGames")
 const Endpoints = require("./staticGameConfiguration/endponts")
 
 io.on('connection', socket => {
-
-  socket.on("connect-to-game", username_user_and_game_id => {
-
-    ActiveUsersManager.addActiveUser(username_user_and_game_id["game_id"], username_user_and_game_id["user_id"], socket.id, username_user_and_game_id["username"])
+  socket.on(Endpoints.CONNECT_TO_GAME, data => {
+    let user_id = data["user_id"]
+    let game_id = data["game_id"]
+    let username = data["username"]
+    ActiveUsersManager.addActiveUser(game_id, user_id, socket.id, username)
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
-    console.log(user.game_id)
     let game = ActiveGamesManager.getActiveGameById(user.game_id)
-    console.log(game)
-    if (!game) return null
-    return game.getGame()
+    socket.emit(Endpoints.CONNECT_TO_GAME, game.getGame(user_id));
   })
 
   socket.on(Endpoints.JOIN_GAME, data=> {
-    //ripasso a tutti tutto, ricord di mettere anche local id a tutti diverso
+    //ripasso a tutti tutto, ricordi di mettere anche local id a tutti diverso
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
     let game = ActiveGamesManager.getActiveGameById(user.game_id)
 
