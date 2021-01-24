@@ -109,8 +109,7 @@ class ActiveGamesManager{
                     is_revelation_turn: isRevelationTurn,
                     players: players,
                     mister_x_moves:misterXMoves,
-                    last_known_position: lastKnownPosition,
-                    username: ""
+                    last_known_position: lastKnownPosition
                 }
                 return json
             case 2:
@@ -160,6 +159,7 @@ class ActiveGamesManager{
         }
         this.players.push(new ActiveGamesUser(userDict))
         this.players_order.push(userId)
+        return true
     } //funziona
 
     getPlayerById(playerId){ //funziona
@@ -339,7 +339,7 @@ class ActiveGamesManager{
                 color: player.color,
                 is_admin: player.local_id === this.admin_user_id,
                 position: position, //null, se non misterX
-                //username: ActiveUsersManager.findActiveUserById(player.user_id).username
+                username: ActiveUsersManager.findActiveUserById(player.user_id).username
             })
         })
         return players

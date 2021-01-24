@@ -15,22 +15,20 @@ io.on('connection', socket => {
       game = ActiveGamesManager.createActiveGame(user_id, game_id)
       game.saveToFile()
     }
-    socket.emit(Endpoints.CONNECT_TO_GAME, game.getGame(user_id));
+    socket.emit(Endpoints.CONNECT_TO_GAME, game.getGame(user_id))
   })
 
-  socket.on(Endpoints.JOIN_GAME, data=> {
-    //ripasso a tutti tutto, ricordi di mettere anche local id a tutti diverso
+  socket.on(Endpoints.JOIN_GAME, ()=> {
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
     let game = ActiveGamesManager.getActiveGameById(user.game_id)
-
     if (!game || game.status !== 0) return null
-    //TODO: send to everyone user joined message
+    game.saveToFile()
+    let success = game.addPlayer(user.user_id)
+    if (!success) return null
     let gameUsers = ActiveUsersManager.getUsersByGameId(game.id)
     gameUsers.forEach(player =>{
       io.sockets.connected[player.session_id].emit(Endpoints.JOIN_GAME, game.getGame(player.user_id));
     })
-    console.log(game.getGame(user.user_id))
-    return ""
   })
 
   socket.on('disconnect', () => {

@@ -65,7 +65,12 @@ class ActiveUsersManager{
 
     static findActiveUserById(userId){
         const allUsers = this.getActiveUsersJson()
-        allUsers.forEach(user => {if (user.user_id == userId) return user;})//return user})
+        for (let i=0; i<allUsers.length; i++){
+            let user = allUsers[i]
+            if (user.user_id === userId){
+                return user
+            }
+        }
         return null
     }
 
