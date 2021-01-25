@@ -39,7 +39,7 @@ class ActiveUsersManager{
                 if (allUsers[i].user_id != userId){
                     newAllUsers.push(allUsers[i])
                 } else {
-                    console.log("eilminato")
+                    //console.log("eilminato")
                 }
             }
             return newAllUsers
@@ -52,7 +52,7 @@ class ActiveUsersManager{
             if (allUsers[i].session_id !== sessionId){
                 newAllUsers.push(allUsers[i])
             } else {
-                console.log("eilminato")
+                //console.log("eilminato")
             }
         }
         return newAllUsers

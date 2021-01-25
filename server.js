@@ -16,16 +16,49 @@ io.on('connection', socket => {
       game.saveToFile()
     }
     socket.emit(Endpoints.CONNECT_TO_GAME, game.getGame(user_id))
+    sendLobbyChangedToPlayers(game)
   })
 
   socket.on(Endpoints.JOIN_GAME, ()=> {
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    if (!user) return null
     let game = ActiveGamesManager.getActiveGameById(user.game_id)
     if (!game || game.status !== 0) return null
-    game.saveToFile()
     let success = game.addPlayer(user.user_id)
+    game.saveToFile()
     if (!success) return null
     sendLobbyChangedToPlayers(game)
+  })
+
+  socket.on(Endpoints.QUIT_GAME, ()=>{
+    let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    if (!user) return null
+    let game = ActiveGamesManager.getActiveGameById(user.game_id)
+    if (game) {
+      if (game.status === 0) {
+        let success = game.removePlayer(user.user_id)
+        game.saveToFile()
+        if (success) sendLobbyChangedToPlayers(game)
+      }
+    }
+  })
+
+  socket.on(Endpoints.KICK_FROM_GAME, (localId)=>{
+    console.log(localId)
+    let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    if (!user) return null
+    let game = ActiveGamesManager.getActiveGameById(user.game_id)
+    if (game) {
+      let player = game.getPlayerById(user.user_id)
+      if (game.admin_user_id === player.local_id){
+        if (game.status === 0) {
+          let user_t_r = game.getPlayerByLocalId(localId)
+          let success = game.removePlayer(user_t_r.user_id)
+          game.saveToFile()
+          if (success) sendLobbyChangedToPlayers(game)
+        }
+      }
+    }
   })
 
   socket.on(Endpoints.CHANGE_COLOR, color => {
@@ -51,11 +84,28 @@ io.on('connection', socket => {
 
   socket.on('disconnect', () => {
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    if (!user) return null
     let game = ActiveGamesManager.getActiveGameById(user.game_id)
     if (game){
       if (game.status === 0){
         let success = game.removePlayer(user.user_id)
-        if (success) sendLobbyChangedToPlayers(game)
+        if (success === "game_deleted"){
+          //manda segnale di partita eliminata
+          let gameUsers = ActiveUsersManager.getUsersByGameId(game.id)
+          gameUsers.forEach(player => {
+            if (player){
+              let s = io.sockets.connected[player.session_id]
+              if (s) s.emit(Endpoints.LOBBY_MODIFIED, {status: 3});
+            }
+
+          })
+        }
+      if (success === "user_deleted"){
+        game.saveToFile()
+        sendLobbyChangedToPlayers(game)
+      }
+
+
       }else{
         //send user offline, chenage user status
       }
@@ -70,8 +120,12 @@ io.on('connection', socket => {
 
 function sendLobbyChangedToPlayers(game){
   let gameUsers = ActiveUsersManager.getUsersByGameId(game.id)
-  gameUsers.forEach(player =>{
-    io.sockets.connected[player.session_id].emit(Endpoints.LOBBY_MODIFIED, game.getGame(player.user_id));
+  gameUsers.forEach(player => {
+    if (player){
+      let s = io.sockets.connected[player.session_id]
+      if (s) s.emit(Endpoints.LOBBY_MODIFIED, game.getGame(player.user_id));
+    }
+
   })
 }
 

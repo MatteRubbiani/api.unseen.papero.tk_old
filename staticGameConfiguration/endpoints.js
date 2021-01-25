@@ -1,5 +1,7 @@
 class Endpoints{
     static CONNECT_TO_GAME = "connect-to-game" //tutto a chi a chiesto, se mister-x bla bla
+    static QUIT_GAME = "quit-game"
+    static KICK_FROM_GAME = "kick-from-game"
     static JOIN_GAME = "join-game" //mando tutti i giocatori
     static CHANGE_COLOR = "change-color" //{user_id: color}
     static CHANGE_MISTER_X = "change-mister-x" //mando tutti i giocatori

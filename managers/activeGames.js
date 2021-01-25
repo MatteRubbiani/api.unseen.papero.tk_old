@@ -52,7 +52,7 @@ class ActiveGamesManager{
         this.id = activeGameJson.id
         this.status = parseInt(activeGameJson.status)
         this.players_order = activeGameJson.players_order
-        this.admin_user_id = 0
+        this.admin_user_id = activeGameJson.admin_user_id
         this.players = this.createPlayersArray(activeGameJson.players)
         this.total_moves = parseInt(activeGameJson.total_moves)
         this.mister_x = new ActiveGamesMisterX(activeGameJson.mister_x)
@@ -68,7 +68,7 @@ class ActiveGamesManager{
 
     createPlayersArray(playersArray){
         let players = []
-        playersArray.forEach(userDict => players.push(new ActiveGamesUser(userDict)))
+        playersArray.forEach(userDict =>{ if (userDict) players.push(new ActiveGamesUser(userDict))})
         return players
     } //funziona
 
@@ -85,8 +85,8 @@ class ActiveGamesManager{
                         local_id: player.local_id,
                         is_mister_x: player.is_mister_x ,
                         color: player.color,
-                        is_admin: player.user_id === this.admin_user_id,
-                        username: player.user_id//ActiveUsersManager.findActiveUserById(player.user_id).username
+                        is_admin: player.local_id === this.admin_user_id,
+                        username: ActiveUsersManager.findActiveUserById(player.user_id).username
                     }
                     //console.log(ActiveUsersManager.findActiveUserById(player.user_id))
                     players.push(p)
@@ -150,7 +150,7 @@ class ActiveGamesManager{
         if (this.getPlayerById(userId)) return null
         const userDict = {
             user_id: userId,
-            local_id: this.players.length,
+            local_id: Date.now(),
             is_mister_x: false,
             position: 1,
             color: this.findFirstAvailableColor(),
@@ -167,11 +167,21 @@ class ActiveGamesManager{
     removePlayer(userId){
         for (let i=0; i<this.players.length; i++){
             if (this.players[i].user_id === userId){
-                delete this.players[i].user_id
-                return true
+                if (this.players.length < 2){
+                    this.deleteGame()
+                    console.log("gioco eliminato")
+                    return "game_deleted"
+                }
+                if(this.players[i].local_id === this.admin_user_id){
+                    this.players.splice(i, 1)
+                    this.admin_user_id = this.players[0] ? this.players[0].local_id : this.players[1].local_id
+                }else{
+                    this.players.splice(i, 1)
+                }
+                return "user_deleted"
             }
         }
-        return false
+        return null
     }
 
     getPlayerById(playerId){ //funziona
@@ -375,7 +385,7 @@ class ActiveGamesManager{
             id: gameId,
             status: 0,
             players_order: [userId], //mister x will be first
-            admin_user_id: userId,
+            admin_user_id: 0,
             players: [
                 {
                     local_id: 0,
@@ -404,6 +414,18 @@ class ActiveGamesManager{
         let allGamesRaw = fs.readFileSync(this.activeGamesPath)
         return JSON.parse(allGamesRaw)
     } //funziona
+
+    deleteGame(){
+        let data = JSON.parse(fs.readFileSync(this.activeGamesPath))
+        let new_data = []
+        for (let i=0; i<data.length; i++){
+            if (data[i].id !== this.id){
+                new_data.push(data[i])
+            }
+        }
+        new_data = JSON.stringify(data)
+        fs.writeFileSync(this.activeGamesPath, new_data)
+    }
 
     saveToFile(){
         let data = JSON.parse(fs.readFileSync(this.activeGamesPath))
