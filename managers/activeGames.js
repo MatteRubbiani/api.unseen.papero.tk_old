@@ -132,12 +132,12 @@ class ActiveGamesManager{
         }
         let userId = this.getPlayerByLocalId(localId).user_id
         let changed = false
-        let new_index; let old_index;
+        let new_index = -1; let old_index = -1;
         for (let i=0; i<this.players.length;i++){
             if (this.players[i].is_mister_x)  old_index = i
             if (this.players[i].user_id === userId) new_index = i
         }
-        if (new_index && old_index){
+        if (new_index !== -1 && old_index !== -1){
             this.players[new_index].is_mister_x = true
             this.players[old_index].is_mister_x = false
             this.players[new_index].color = -1
