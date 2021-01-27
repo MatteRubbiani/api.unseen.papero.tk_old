@@ -11,6 +11,7 @@ class Endpoints{
     static MOVE_MISTER_X = "move-mister-x" //{_from: x, _to: y, transport, //{//{user_id: x, players_turn: y, last_moves:(null) [(dall'ultima rivelazione,)
                                     // move: {_from:, _to: transport:,}]}
     static END_GAME = "end-game"
+    static SESSION_PAUSED = "session-paused"
 }
 
 module.exports = Endpoints

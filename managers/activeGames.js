@@ -81,12 +81,15 @@ class ActiveGamesManager{
         switch (this.status){
             case 0:
                 this.players.forEach(player => {
+                    let activeUser = ActiveUsersManager.findActiveUserById(player.user_id)
+                    let username
+                    (activeUser) ? username = activeUser.username : null
                     let p = {
                         local_id: player.local_id,
                         is_mister_x: player.is_mister_x ,
                         color: player.color,
                         is_admin: player.local_id === this.admin_user_id,
-                        username: ActiveUsersManager.findActiveUserById(player.user_id).username
+                        username: username
                     }
                     //console.log(ActiveUsersManager.findActiveUserById(player.user_id))
                     players.push(p)

@@ -9,6 +9,10 @@ io.on('connection', socket => {
     let user_id = data["user_id"]
     let game_id = data["game_id"]
     let username = data["username"]
+    let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    if (user){
+      io.sockets.connected[user.session_id].emit(Endpoints.SESSION_PAUSED, "");
+    }
     ActiveUsersManager.addActiveUser(game_id, user_id, socket.id, username)
     let game = ActiveGamesManager.getActiveGameById(game_id)
     if (!game){
@@ -63,6 +67,7 @@ io.on('connection', socket => {
 
   socket.on(Endpoints.CHANGE_COLOR, color => {
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    if (!user) return null
     let game = ActiveGamesManager.getActiveGameById(user.game_id)
     if (!game || game.status !== 0) return null
     let success = game.setColor(user.user_id, parseInt(color))
