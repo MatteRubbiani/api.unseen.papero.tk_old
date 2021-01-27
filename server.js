@@ -11,7 +11,10 @@ io.on('connection', socket => {
     let username = data["username"]
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
     if (user){
-      io.sockets.connected[user.session_id].emit(Endpoints.SESSION_PAUSED, "");
+      let s = io.sockets.connected[user.session_id]
+      if (s){
+        io.sockets.connected[user.session_id].emit(Endpoints.SESSION_PAUSED, "");
+      }
     }
     ActiveUsersManager.addActiveUser(game_id, user_id, socket.id, username)
     let game = ActiveGamesManager.getActiveGameById(game_id)
