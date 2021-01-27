@@ -71,11 +71,11 @@ io.on('connection', socket => {
     sendLobbyChangedToPlayers(game)
   })
 
-  socket.on(Endpoints.CHANGE_MISTER_X, misterXId =>{
+  socket.on(Endpoints.CHANGE_MISTER_X, misterXLocalId =>{
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
     let game = ActiveGamesManager.getActiveGameById(user.game_id)
     if (!game || game.status !== 0) return null
-    let success = game.setMisterX(user.user_id, misterXId)
+    let success = game.setMisterX(user.user_id, misterXLocalId)
     if (!success) return null
     game.saveToFile()
     sendLobbyChangedToPlayers(game)

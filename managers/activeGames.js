@@ -126,18 +126,25 @@ class ActiveGamesManager{
         return null
     } //funziona
 
-    setMisterX(adminId, userId){
+    setMisterX(adminId, localId){
         if (adminId !== this.getPlayerByLocalId(this.admin_user_id).user_id){
             return null
         }
+        let userId = this.getPlayerByLocalId(localId).user_id
+        let changed = false
+        let new_index; let old_index;
         for (let i=0; i<this.players.length;i++){
-            if (this.players[i].is_mister_x) this.players[i].is_mister_x = false
-            if (this.players[i].user_id === userId){
-                this.players[i].is_mister_x = true;
-            }
+            if (this.players[i].is_mister_x)  old_index = i
+            if (this.players[i].user_id === userId) new_index = i
         }
-
-
+        if (new_index && old_index){
+            this.players[new_index].is_mister_x = true
+            this.players[old_index].is_mister_x = false
+            this.players[new_index].color = -1
+            this.players[old_index].color = this.findFirstAvailableColor()
+            changed = true
+        }
+        return changed
     } //funziona
 
     createMovesArray(movesArray){
