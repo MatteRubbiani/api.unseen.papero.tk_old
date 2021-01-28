@@ -140,11 +140,13 @@ class ActiveGamesManager{
             if (this.players[i].is_mister_x)  old_index = i
             if (this.players[i].user_id === userId) new_index = i
         }
-        if (new_index !== -1 && old_index !== -1){
+        if (new_index !== -1){
             this.players[new_index].is_mister_x = true
-            this.players[old_index].is_mister_x = false
             this.players[new_index].color = -1
-            this.players[old_index].color = this.findFirstAvailableColor()
+            if(old_index !== -1){
+                this.players[old_index].is_mister_x = false
+                this.players[old_index].color = this.findFirstAvailableColor()
+            }
             changed = true
         }
         return changed
@@ -250,6 +252,7 @@ class ActiveGamesManager{
         this.status = 1
         this.players_order = this.createRandomPlayersOrderMisterXFirst()
         let players_possible_pos = this.shuffle(gameConfig.possible_player_starting_positions)
+        if (!this.getMisterXPlayer()) return null
         for (let i=0; i<this.players.length; i++){
             if (this.players[i].is_mister_x){
                 this.players[i].position = gameConfig.possible_mister_x_starting_positions[Math.floor(Math.random() * gameConfig.possible_mister_x_starting_positions.length)];
@@ -257,6 +260,7 @@ class ActiveGamesManager{
                 this.players[i].position = players_possible_pos[i]
             }
         }
+
     }
 
     createRandomPlayersOrderMisterXFirst(){

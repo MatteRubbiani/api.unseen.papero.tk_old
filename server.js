@@ -89,6 +89,15 @@ io.on('connection', socket => {
     sendLobbyChangedToPlayers(game)
   })
 
+  socket.on(Endpoints.START_GAME, ()=>{
+    let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
+    let game = ActiveGamesManager.getActiveGameById(user.game_id)
+    if (!game || game.status !== 0) return null
+    let success = game.startGame()
+    if (success){
+      emitToPlayers(game, Endpoints.START_GAME, game.getGame())
+    }
+  })
 
   socket.on('disconnect', () => {
     let user = ActiveUsersManager.findActiveUserBySessionId(socket.id)
@@ -139,8 +148,13 @@ function sendLobbyChangedToPlayers(game){
 
 function emitToPlayers(game, endpoint, message){
   let gameUsers = ActiveUsersManager.getUsersByGameId(game.id)
-  gameUsers.forEach(player =>{
-    io.sockets.connected[player.session_id].emit(endpoint, message);
+  gameUsers.forEach(player => {
+    if (player){
+      let s = io.sockets.connected[player.session_id]
+      if (s){
+        s.emit(endpoint, message);
+      }
+    }
   })
 }
 
