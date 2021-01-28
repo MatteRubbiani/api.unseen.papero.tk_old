@@ -406,7 +406,7 @@ class ActiveGamesManager{
                     user_id: userId,
                     is_mister_x: true,
                     position: 1,
-                    color: 0,
+                    color: -1,
                     used_taxi: 0,
                     used_bus: 0,
                     used_underground: 0,
