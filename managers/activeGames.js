@@ -190,6 +190,7 @@ class ActiveGamesManager{
                 }else{
                     this.players.splice(i, 1)
                 }
+                //togli da lista
                 return "user_deleted"
             }
         }
@@ -260,6 +261,7 @@ class ActiveGamesManager{
                 this.players[i].position = players_possible_pos[i]
             }
         }
+        return true
 
     }
 

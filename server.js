@@ -95,6 +95,7 @@ io.on('connection', socket => {
     if (!game || game.status !== 0) return null
     let success = game.startGame()
     if (success){
+      game.saveToFile()
       emitToPlayers(game, Endpoints.START_GAME, game.getGame())
     }
   })
