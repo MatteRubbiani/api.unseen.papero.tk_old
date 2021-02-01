@@ -1,26 +1,10 @@
-const fs = require('fs');
+const io = require('socket.io')(3000)
 const ActiveUsersManager = require("./managers/activeUsers")
 const PathsManager = require("./staticGameConfiguration/paths")
 const ActiveGamesManager = require("./managers/activeGames")
 const Endpoints = require("./staticGameConfiguration/endpoints")
 
-const options = {
-  key: fs.readFileSync('/var/www/ssl/papero.tk.key'),
-  cert: fs.readFileSync('/var/www/ssl/papero.tk.pem')
-};
-
-//const httpServer = require('http').createServer();
-const httpsServer = require('https').createServer(options);
-let ioServer = require('socket.io');
-
-let io = new ioServer();
-//io.attach(httpServer);
-io.attach(httpsServer);
-//httpServer.listen(8150);
-httpsServer.listen(8151);
-
-
-io.sockets.on('connection', socket => {
+io.on('connection', socket => {
   socket.on(Endpoints.CONNECT_TO_GAME, data => {
     let user_id = data["user_id"]
     let game_id = data["game_id"]
