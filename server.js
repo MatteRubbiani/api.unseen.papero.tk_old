@@ -1,4 +1,8 @@
-const io = require('socket.io')(3000)
+const io = require('socket.io')(3000, {
+  allowRequest: (req, callback) =>{
+    callback(null, req.headers.origin == undefined)
+  }
+})
 const ActiveUsersManager = require("./managers/activeUsers")
 const PathsManager = require("./staticGameConfiguration/paths")
 const ActiveGamesManager = require("./managers/activeGames")

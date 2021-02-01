@@ -76,7 +76,6 @@ class ActiveGamesManager{
         let json
         let yourUser = this.getPlayerById(userId)
         let yourLocalId = (yourUser) ? yourUser.local_id : null
-
         let players = []
         switch (this.status){
             case 0:
