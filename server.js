@@ -1,11 +1,10 @@
-const io = require('socket.io')(3000)
 const ActiveUsersManager = require("./managers/activeUsers")
 const PathsManager = require("./staticGameConfiguration/paths")
 const ActiveGamesManager = require("./managers/activeGames")
 const Endpoints = require("./staticGameConfiguration/endpoints")
 const app = require('express')();
 const http = require('http').Server(app);
-
+const io = require('socket.io')(http);
 io.on('connection', socket => {
   socket.on(Endpoints.CONNECT_TO_GAME, data => {
     let user_id = data["user_id"]
@@ -160,6 +159,7 @@ function emitToPlayers(game, endpoint, message){
     }
   })
 }
+
 http.listen(3000, () => {
   console.log('listening on *:3000');
 });
