@@ -3,6 +3,8 @@ const ActiveUsersManager = require("./managers/activeUsers")
 const PathsManager = require("./staticGameConfiguration/paths")
 const ActiveGamesManager = require("./managers/activeGames")
 const Endpoints = require("./staticGameConfiguration/endpoints")
+const app = require('express')();
+const http = require('http').Server(app);
 
 io.on('connection', socket => {
   socket.on(Endpoints.CONNECT_TO_GAME, data => {
@@ -158,6 +160,6 @@ function emitToPlayers(game, endpoint, message){
     }
   })
 }
-
-
-
+http.listen(3000, () => {
+  console.log('listening on *:3000');
+});
